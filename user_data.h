@@ -2,17 +2,18 @@
 #define __PHONEBOOK_USER_DATA_H__
 
 #include <linux/slab.h>
-
-static int id_counter = 0;
+//#include <linux/phonebook.h>
 
 struct user_data {
-  int   id;
-  char* name;
   char* surname;
+  char* name;
   char* age;
   char* email;
   char* phone;
+  int   id;
 };
+
+static int id_counter = 0;
 
 static char* copystr(const char* s) {
   int len = strlen(s);
