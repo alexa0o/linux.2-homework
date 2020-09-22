@@ -3,8 +3,7 @@
 
 #include <linux/list.h>
 #include <linux/slab.h>
-
-#include "user_data.h"
+#include <linux/phonebook.h>
 
 struct phonebook_node {
   struct user_data* data;
@@ -13,7 +12,7 @@ struct phonebook_node {
 
 LIST_HEAD(phonebook);
 
-static struct user_data* phonebook_get_by_surname(const char* surname) {
+struct user_data* phonebook_get_by_surname(const char* surname) {
   struct list_head* pos = NULL;
 
   list_for_each(pos, &phonebook) {
@@ -28,7 +27,7 @@ static struct user_data* phonebook_get_by_surname(const char* surname) {
   return NULL;
 }
 
-static int phonebook_add_new_user(struct user_data* new_user) {
+int phonebook_add_new_user(struct user_data* new_user) {
   struct phonebook_node* node = (struct phonebook_node*) kmalloc(sizeof(struct phonebook_node), GFP_KERNEL);
   if (node == NULL)
     return 1;
@@ -48,7 +47,7 @@ static int phonebook_delete_user_by_id(int id) {
       return 1;
     if (node->data->id == id) {
       list_del(pos);
-      delete_user(node->data);
+      kfree(node->data);
       kfree(node);
       return 0;
     }
@@ -57,7 +56,7 @@ static int phonebook_delete_user_by_id(int id) {
   return 2;
 }
 
-static int phonebook_delete_user_by_surname(const char* surname) {
+int phonebook_delete_user_by_surname(const char* surname) {
   struct user_data* user = phonebook_get_by_surname(surname);
   return phonebook_delete_user_by_id(user->id);
 }
@@ -70,7 +69,7 @@ static int phonebook_free_list(void) {
     struct phonebook_node* node = NULL;
     node = list_entry(pos, struct phonebook_node, list);
     list_del(pos);
-    delete_user(node->data);
+    kfree(node->data);
     kfree(node);
   }
 
